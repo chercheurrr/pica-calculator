@@ -1,0 +1,765 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>洛克王国 - 皮卡随机商店卡池计算器</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js">
+</script>
+<style>
+:root {
+  --gold: #f7c948;
+  --gold-dark: #b8860b;
+  --purple: #9b59f5;
+  --purple-dark: #6f42c1;
+  --bg: #f5f6fa;
+  --card: #ffffff;
+  --text: #2c3e50;
+  --sub: #7f8c8d;
+  --owned: #95a5a6;
+  --danger: #e74c32;
+  --primary: #3498db;
+  --success: #2ecc71;
+}
+body {
+  margin: 0;
+  padding: 20px;
+  font-family: "Microsoft YaHei","PingFang SC",Arial,sans-serif;
+  background: var(--bg);
+  color: var(--text);
+}
+.container {
+  max-width: 1400px;
+  margin: 0 auto;
+}
+h1 {
+  text-align: center;
+  margin-bottom: 4px;
+}
+.subtitle {
+  text-align: center;
+  color: var(--sub);
+  margin-bottom: 20px;
+  font-size: 14px;
+}
+.top-bar {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+.top-bar button {
+  padding: 8px 16px;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+  color: #fff;
+}
+.btn-clear { background: var(--danger); }
+.btn-export { background: var(--primary); }
+.btn-import { background: var(--success); }
+.budget-panel {
+  background: linear-gradient(135deg,#667eea 0%,#764ba2 100%);
+  color: #fff;
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 24px;
+  box-shadow: 0 4px 16px rgba(0,0,0,.15);
+}
+.budget-title {
+  font-size: 20px;
+  font-weight: bold;
+  margin-bottom: 6px;
+}
+.budget-desc {
+  font-size: 13px;
+  opacity: .85;
+  margin-bottom: 16px;
+}
+.budget-form {
+  display: grid;
+  grid-template-columns: repeat(auto-fit,minmax(210px,1fr));
+  gap: 14px;
+  margin-bottom: 16px;
+}
+.budget-field label {
+  display: block;
+  font-size: 13px;
+  margin-bottom: 4px;
+  opacity: .9;
+}
+.budget-field input {
+  width: 100%;
+  padding: 8px 10px;
+  border-radius: 6px;
+  border: none;
+  font-size: 14px;
+  box-sizing: border-box;
+}
+.budget-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+.budget-btn {
+  background: #fff;
+  color: #333;
+  border: none;
+  border-radius: 6px;
+  padding: 8px 18px;
+  font-size: 14px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.budget-btn:hover { background: #f0f0f0; }
+.budget-btn-danger { background: #ffe0e0; color: #b00; }
+.budget-result {
+  display: grid;
+  grid-template-columns: repeat(auto-fit,minmax(175px,1fr));
+  gap: 14px;
+}
+.budget-box {
+  background: rgba(255,255,255,.15);
+  border-radius: 8px;
+  padding: 12px;
+  backdrop-filter: blur(4px);
+}
+.budget-box .b-label { font-size: 13px; opacity: .85; }
+.budget-box .b-value { font-size: 23px; font-weight: bold; margin-top: 4px; }
+.budget-tip {
+  font-size: 12px;
+  opacity: .8;
+  margin-top: 12px;
+  line-height: 1.6;
+}
+.budget-history {
+  margin-top: 12px;
+  font-size: 13px;
+}
+.budget-history summary { cursor: pointer; opacity: .9; }
+.budget-history pre {
+  margin: 6px 0 0 0;
+  font-size: 12px;
+  opacity: .85;
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+.summary {
+  display: grid;
+  grid-template-columns: repeat(auto-fit,minmax(155px,1fr));
+  gap: 14px;
+  margin-bottom: 24px;
+}
+.summary-item {
+  background: var(--card);
+  border-radius: 10px;
+  padding: 16px;
+  text-align: center;
+  box-shadow: 0 2px 8px rgba(0,0,0,.06);
+}
+.summary-item .num { font-size: 28px; font-weight: bold; }
+.summary-item .label { font-size: 13px; color: var(--sub); }
+.charts {
+  display: grid;
+  grid-template-columns: repeat(auto-fit,minmax(310px,1fr));
+  gap: 20px;
+  margin-bottom: 24px;
+}
+.chart-card {
+  background: var(--card);
+  border-radius: 10px;
+  padding: 20px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.06);
+}
+.chart-title { font-size: 16px; font-weight: bold; margin-bottom: 10px; text-align: center; }
+.chart-wrapper { position: relative; height: 270px; }
+.fav-section { margin-bottom: 30px; }
+.section-title {
+  font-size: 20px;
+  font-weight: bold;
+  margin-bottom: 14px;
+  padding-left: 12px;
+  border-left: 6px solid var(--gold);
+}
+.suits { display: grid; grid-template-columns: repeat(auto-fill,minmax(285px,1fr)); gap: 16px; }
+.card {
+  background: var(--card);
+  border-radius: 12px;
+  padding: 14px;
+  box-shadow: 0 2px 10px rgba(0,0,0,.08);
+  position: relative;
+}
+.card.gold { border-top: 4px solid var(--gold); }
+.card.purple { border-top: 4px solid var(--purple); }
+.card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; }
+.suit-name { font-weight: bold; font-size: 15px; }
+.fav-btn { background: none; border: none; font-size: 20px; cursor: pointer; color: #ccc; transition: color .2s; }
+.fav-btn.active { color: var(--gold); }
+.suit-meta { font-size: 13px; color: var(--sub); margin-bottom: 6px; }
+.suit-cost { font-size: 13px; color: var(--sub); }
+.suit-cost strong { color: var(--danger); }
+.progress-bar-bg {
+  width: 100%;
+  height: 10px;
+  background: #eee;
+  border-radius: 5px;
+  margin: 8px 0;
+  overflow: hidden;
+}
+.progress-bar {
+  height: 100%;
+  border-radius: 5px;
+  background: linear-gradient(90deg,var(--primary),var(--success));
+  transition: width .3s;
+}
+.suit-image {
+  width: 100%;
+  aspect-ratio: 3/4;
+  background: #f0f0f0;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--sub);
+  font-size: 14px;
+  margin-bottom: 10px;
+  overflow: hidden;
+}
+.suit-image img { width: 100%; height: 100%; object-fit: contain; }
+.parts { display: flex; flex-wrap: wrap; gap: 6px; }
+.part {
+  font-size: 12px;
+  padding: 4px 8px;
+  border-radius: 12px;
+  border: 1px solid #ddd;
+  background: #f9f9f9;
+  cursor: pointer;
+  user-select: none;
+}
+.part:hover { background: #eee; }
+.part.owned { text-decoration: line-through; color: var(--owned); background: #f1f1f1; border-color: #ccc; }
+.filter-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+  margin-bottom: 20px;
+}
+.filter-bar select,.filter-bar input {
+  padding: 6px 10px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  font-size: 14px;
+}
+.filter-bar label { font-size: 14px; color: var(--sub); }
+.fav-empty-msg {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #999;
+  font-size: 14px;
+}
+@media (max-width:700px) {
+  body { padding: 12px; }
+  .chart-wrapper { height: 230px; }
+}
+</style>
+</head>
+<body>
+<div class="container">
+
+<h1>洛克王国 · 皮卡随机商店卡池</h1>
+<p class="subtitle">点击配件标记为已拥有，点击 ★ 收藏置顶；数据会自动保存在本地</p>
+<p style="font-size:12px;color:#888;text-align:center;max-width:760px;margin:0 auto 18px;">
+  非官方粉丝工具 · 与腾讯/魔方工作室无关 · 素材来源于游戏内截图 · 仅供玩家交流参考
+</p>
+<div class="top-bar">
+  <button class="btn-clear" onclick="clearData()">清除数据</button>
+  <button class="btn-export" onclick="exportData()">导出数据</button>
+  <button class="btn-import" onclick="importData()">导入数据</button>
+</div>
+
+<div class="budget-panel">
+  <div class="budget-title">⭐ 许愿星预算规划</div>
+  <div class="budget-desc" id="budgetGuide">首次使用时，请在"已有许愿星库存"中填写当前库存，然后点击"提交已有库存"。之后每天打开网页，只需填写"今日许愿星获取量"并提交即可。</div>
+  <div class="budget-form">
+    <div class="budget-field"><label>已有许愿星库存</label><input type="number" id="budgetStarStock" value="0" min="0"></div>
+    <div class="budget-field"><label>今日许愿星获取量</label><input type="number" id="budgetTodayGain" value="0" min="0"></div>
+  </div>
+  <div class="budget-actions">
+    <button class="budget-btn" onclick="submitStarStock()">📦 提交已有库存</button>
+    <button class="budget-btn" onclick="submitTodayGain()">📥 提交今日获取量</button>
+    <button class="budget-btn budget-btn-danger" onclick="clearStarStock()">🧹 清除已有许愿星库存</button>
+    <button class="budget-btn budget-btn-danger" onclick="clearBudgetHistory()">🗑️ 清空预算历史</button>
+  </div>
+  <div class="budget-result">
+    <div class="budget-box"><div class="b-label">已有许愿星库存</div><div class="b-value" id="budgetStockDisplay">0</div></div>
+    <div class="budget-box"><div class="b-label">今日许愿星获取量</div><div class="b-value" id="budgetTodayDisplay">0</div></div>
+    <div class="budget-box"><div class="b-label">毕业所需许愿星</div><div class="b-value" id="budgetNeed">0</div></div>
+    <div class="budget-box"><div class="b-label">预计毕业天数（按今日获取量）</div><div class="b-value" id="budgetDaysNormal">0 天</div></div>
+    <div class="budget-box"><div class="b-label">预计毕业天数（按每日上限 25）</div><div class="b-value" id="budgetDaysMax">0 天</div></div>
+  </div>
+  <div class="budget-history">
+    <details><summary>查看预算提交历史</summary><pre id="budgetHistoryText">暂无记录</pre></details>
+  </div>
+  <div class="budget-tip">
+    说明：<br>
+    1. 首次使用时，请在"已有许愿星库存"中填写你当前的许愿星数量，然后点击"提交已有库存"。<br>
+    2. 之后每天打开网页，只需填写"今日许愿星获取量"，例如 15、20、25，再点击"提交今日获取量"。<br>
+    3. 提交今日获取量后，会自动累加到已有许愿星库存中，并重新计算毕业预算。<br>
+    4. 毕业所需许愿星 = 当前缺口许愿星 − 已有许愿星库存。<br>
+    5. 如果今天已经提交过今日获取量，再次提交会要求确认，避免重复累加。<br>
+    6. 如果已有许愿星库存录入错误或忘记录入，可以直接修改"已有许愿星库存"，然后点击"提交已有库存"进行修正。
+  </div>
+</div>
+
+<div class="summary">
+  <div class="summary-item"><div class="num" id="totalSuits">0</div><div class="label">总套装数</div></div>
+  <div class="summary-item"><div class="num" id="totalParts">0</div><div class="label">总配件数</div></div>
+  <div class="summary-item"><div class="num" id="ownedParts">0</div><div class="label">已拥有配件</div></div>
+  <div class="summary-item"><div class="num" id="missingParts">0</div><div class="label">未拥有配件</div></div>
+  <div class="summary-item"><div class="num" id="ownedSuits">0</div><div class="label">已毕业套装</div></div>
+  <div class="summary-item"><div class="num" id="needStars">0</div><div class="label">当前缺口许愿星</div></div>
+</div>
+
+<div class="filter-bar">
+  <label>筛选：</label>
+  <select id="filterType" onchange="render()">
+    <option value="all">全部</option>
+    <option value="gold">只显示金色</option>
+    <option value="purple">只显示紫色</option>
+    <option value="fav">只显示收藏</option>
+  </select>
+  <label>排序：</label>
+  <select id="sortType" onchange="render()">
+    <option value="default">默认顺序</option>
+    <option value="missingAsc">优先展示缺口小</option>
+    <option value="missingDesc">优先展示缺口大</option>
+    <option value="progressAsc">优先展示进度低</option>
+    <option value="progressDesc">优先展示进度高</option>
+  </select>
+  <label>搜索：</label>
+  <input type="text" id="searchInput" placeholder="输入套装名称" oninput="render()">
+</div>
+
+<div class="charts">
+  <div class="chart-card">
+    <div class="chart-title">整体卡池进度</div>
+    <div class="chart-wrapper"><canvas id="overviewChart"></canvas></div>
+  </div>
+  <div class="chart-card">
+    <div class="chart-title">收藏套装进度</div>
+    <div class="chart-wrapper" id="favChartWrapper">
+      <canvas id="favChart" style="display:none;"></canvas>
+      <div class="fav-empty-msg" id="favEmptyMsg">暂无收藏套装，点击套装右上角 ★ 即可置顶</div>
+    </div>
+  </div>
+</div>
+
+<div class="fav-section" id="favSection" style="display:none;">
+  <div class="section-title">★ 收藏置顶</div>
+  <div id="favContainer" class="suits"></div>
+</div>
+
+<div>
+  <div class="section-title">全部套装</div>
+  <div id="allContainer" class="suits"></div>
+</div>
+
+</div>
+
+<script>
+// ======================== 卡池数据 ========================
+const goldSuits = [
+  "音速犬印象","岚鸟印象","厉毒修萝印象","星光狮印象","烈火守护印象",
+  "皇家狮鹫印象","翠顶夫人印象","卡洛儿印象","花魁蜂后印象","爵士鹿印象",
+  "熔岩布丁印象","蹦蹦花印象","红绒十字印象","白金独角兽印象","花衣蝶印象"
+];
+const purpleSuits = [
+  "獠牙猪印象","圣代甜甜印象","蒲公英娃娃印象","梦悠悠印象",
+  "电球咩咩印象","雪影娃娃印象","幽冥眼印象","雪灵印象"
+];
+const partNames = ["衣服","帽子","背包","鞋子","手套","袜子"];
+const goldPartPrices = [74,41,34,20,17,9];
+const purplePartPrices = [42,20,18,8,6,4];
+const suitImages = {
+  "音速犬印象":"https://bee-reg-ab.imagency.cn/e/95ac15a2de40d159f875e99ce4b829a2.jpg",
+  "岚鸟印象":"https://bee-reg-ab.imagency.cn/e/a3f2439370cdcc5888c046bcb5df921e.jpg",
+  "厉毒修萝印象":"https://bee-reg-ab.imagency.cn/e/ef8917c59dd231e71f003ad92ac3d0de.jpg",
+  "星光狮印象":"https://bee-reg-ab.imagency.cn/e/d7e4e72f7546624e59f499e8af1cb732.jpg",
+  "烈火守护印象":"https://bee-reg-ab.imagency.cn/e/ef198b76078aa1fabf3bcaad786b1048.jpg",
+  "皇家狮鹫印象":"https://bee-reg-ab.imagency.cn/e/40ad5749883000cfc6281d8411ba5c7b.jpg",
+  "翠顶夫人印象":"https://bee-reg-ab.imagency.cn/e/e76c244a9f8da54b38ed7d2429adb6bf.jpg",
+  "卡洛儿印象":"https://bee-reg-ab.imagency.cn/e/d61801f18bc30e1efb367348cd20589e.jpg",
+  "花魁蜂后印象":"https://bee-reg-ab.imagency.cn/e/71ae721a4855805a1c1147ff0c11c0b4.jpg",
+  "爵士鹿印象":"https://bee-reg-ab.imagency.cn/e/16f72a9d2b396016a164dafbf3f87e62.jpg",
+  "熔岩布丁印象":"https://bee-reg-ab.imagency.cn/e/6273ddee02472241cc82cc96c3721b3e.jpg",
+  "蹦蹦花印象":"https://bee-reg-ab.imagency.cn/e/999d15f11389fd8c8127c1a6527c634a.jpg",
+  "红绒十字印象":"https://bee-reg-ab.imagency.cn/e/106d1eee08ed2ef6fc3ef7c7e74fde1d.jpg",
+  "白金独角兽印象":"https://bee-reg-ab.imagency.cn/e/5208d6323872b76ca840b6b50aeaebcd.jpg",
+  "花衣蝶印象":"https://bee-reg-ab.imagency.cn/e/082c5a6ba4421f62f9d7f4741ac78a55.jpg",
+  "獠牙猪印象":"https://bee-reg-ab.imagency.cn/e/44b64dec33da549e46bc0fb1de33383d.jpg",
+  "圣代甜甜印象":"https://bee-reg-ab.imagency.cn/e/bd9ed2d19c469caafd375061f6462886.jpg",
+  "蒲公英娃娃印象":"https://bee-reg-ab.imagency.cn/e/9de68f2d6d2511959c663e63eb494c43.jpg",
+  "梦悠悠印象":"https://bee-reg-ab.imagency.cn/e/1a4cab00d2b3cefae7f899a28e19bf84.jpg",
+  "电球咩咩印象":"https://bee-reg-ab.imagency.cn/e/7f5ac8d0004437cefef809d0c603c962.jpg",
+  "雪影娃娃印象":"https://bee-reg-ab.imagency.cn/e/9dcc43a87ed8303456da354a1d87fc0e.jpg",
+  "幽冥眼印象":"https://bee-reg-ab.imagency.cn/e/f31ef6fef0b4ff7ab0dd1ab224c85681.jpg",
+  "雪灵印象":"https://bee-reg-ab.imagency.cn/e/e65652002f98fd5bf881cdff6501ef5f.jpg"
+};
+
+// ======================== 状态管理 ========================
+const STORAGE_KEY = "laoke_pica_card_pool_v4";
+const FAV_KEY = "laoke_pica_favorites_v4";
+
+function createDefaultState() {
+  const s = {};
+  goldSuits.forEach(n => s[n] = Array(6).fill(false));
+  purpleSuits.forEach(n => s[n] = Array(6).fill(false));
+  return s;
+}
+
+function loadState() {
+  try {
+    const r = localStorage.getItem(STORAGE_KEY);
+    if(r) { const p = JSON.parse(r); if(typeof p==='object') return p; }
+  }catch(e){console.error(e)}
+  return createDefaultState();
+}
+function saveState(s) { localStorage.setItem(STORAGE_KEY, JSON.stringify(s)); }
+
+function loadFavorites() {
+  try {
+    const r = localStorage.getItem(FAV_KEY);
+    if(r) return new Set(JSON.parse(r));
+  }catch(e){}
+  return new Set();
+}
+function saveFavorites(f) { localStorage.setItem(FAV_KEY, JSON.stringify([...f])); }
+
+let state = loadState();
+let favorites = loadFavorites();
+
+function isGold(n) { return goldSuits.includes(n); }
+function isPurple(n) { return purpleSuits.includes(n); }
+function getPrices(n) { return isGold(n)?goldPartPrices:purplePartPrices; }
+function getFullPrice(n) { return isGold(n)?195:98; }
+
+function calcSuit(name) {
+  const owned = state[name]||[];
+  const prices = getPrices(name);
+  const full = getFullPrice(name);
+  let oc=0, op=0;
+  owned.forEach((o,i)=>{ if(o){ oc++; op+=prices[i]; } });
+  const mp = Math.max(0, full-op);
+  const prog = oc/6 * 100;
+  return { ownedCount:oc, ownedPrice:op, missingPrice:mp, progress:prog, fullPrice:full };
+}
+
+// ======================== 预算管理 ========================
+const BUDGET_KEY = "laoke_pica_budget_v4";
+
+function createDefaultBudget() { return { starStock:0, todayGain:0, lastSubmitDate:"", history:[] }; }
+
+function loadBudget() {
+  try {
+    const r = localStorage.getItem(BUDGET_KEY);
+    if(r) { const p = JSON.parse(r); if(typeof p==='object'&&p!==null) return p; }
+  }catch(e){}
+  return createDefaultBudget();
+}
+function saveBudget(b) { localStorage.setItem(BUDGET_KEY, JSON.stringify(b)); }
+
+let budget = loadBudget();
+
+function getTodayStr() {
+  const d = new Date();
+  return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+}
+
+function submitStarStock() {
+  const inp = document.getElementById('budgetStarStock');
+  const ns = Math.max(0, parseInt(inp.value)||0);
+  if(ns===budget.starStock) { alert('已有许愿星库存没有变化，无需提交。'); return; }
+  const os = budget.starStock;
+  budget.starStock = ns;
+  budget.history.push({ 日期:getTodayStr(), 操作:'修正已有库存', 原库存:os, 新库存:ns });
+  saveBudget(budget);
+  renderBudget();
+  render();
+  alert('已有许愿星库存已更新！\n\n原库存：'+os+'\n新库存：'+ns);
+}
+
+function submitTodayGain() {
+  const inp = document.getElementById('budgetTodayGain');
+  const gain = Math.max(0, parseInt(inp.value)||0);
+  if(gain<=0) { alert('请输入大于 0 的今日许愿星获取量。'); return; }
+  const today = getTodayStr();
+  if(budget.lastSubmitDate===today) {
+    if(!confirm('今天已经提交过今日获取量了。\n\n是否仍要重新提交？\n如果确定，本次获取量会再次累加到已有库存中。')) return;
+  }
+  budget.starStock += gain;
+  budget.todayGain = gain;
+  budget.lastSubmitDate = today;
+  budget.history.push({ 日期:today, 操作:'提交今日获取量', 今日获取量:gain, 提交后库存:budget.starStock });
+  saveBudget(budget);
+  renderBudget();
+  render();
+  alert('提交成功！\n\n今日获取量：'+gain+'\n更新后库存：'+budget.starStock);
+}
+
+function clearStarStock() {
+  if(!confirm('确定要清除已有许愿星库存吗？\n\n此操作不会清空卡池数据、收藏数据和预算历史。')) return;
+  budget.starStock = 0;
+  saveBudget(budget);
+  renderBudget();
+}
+
+function clearBudgetHistory() {
+  if(!confirm('确定要清空预算历史记录吗？\n已有许愿星库存不会被清空。')) return;
+  budget.history = [];
+  budget.lastSubmitDate = "";
+  saveBudget(budget);
+  renderBudget();
+}
+
+function renderBudget() {
+  document.getElementById('budgetStarStock').value = budget.starStock;
+  document.getElementById('budgetTodayGain').value = budget.todayGain;
+  document.getElementById('budgetStockDisplay').textContent = budget.starStock;
+  document.getElementById('budgetTodayDisplay').textContent = budget.todayGain;
+
+  let gap = 0;
+  [...goldSuits,...purpleSuits].forEach(n => { gap += calcSuit(n).missingPrice; });
+  const need = Math.max(0, gap - budget.starStock);
+  document.getElementById('budgetNeed').textContent = need;
+
+  if(need<=0) {
+    document.getElementById('budgetDaysNormal').textContent = '0 天';
+    document.getElementById('budgetDaysMax').textContent = '0 天';
+  } else {
+    const tg = Math.max(1,budget.todayGain);
+    document.getElementById('budgetDaysNormal').textContent = Math.ceil(need/tg)+' 天';
+    document.getElementById('budgetDaysMax').textContent = Math.ceil(need/25)+' 天';
+  }
+
+  const he = document.getElementById('budgetHistoryText');
+  if(budget.history.length===0) he.textContent = '暂无记录';
+  else he.textContent = budget.history.map(h => {
+    if(h.操作==='修正已有库存') return h.日期+'：'+h.操作+'，'+h.原库存+' → '+h.新库存;
+    return h.日期+'：'+h.操作+'，'+h.今日获取量+'，库存 '+h.提交后库存;
+  }).join('\n');
+
+  const guide = document.getElementById('budgetGuide');
+  if(budget.starStock>0) guide.textContent = '已有许愿星库存已填写。之后每天打开网页，只需填写今日许愿星获取量并提交即可。';
+}
+
+// ======================== 渲染 ========================
+let overviewChart = null;
+let favChartInst = null;
+
+function render() {
+  const filterType = document.getElementById('filterType').value;
+  const sortType = document.getElementById('sortType').value;
+  const searchText = document.getElementById('searchInput').value.trim().toLowerCase();
+
+  let tp=0, op=0, mp=0, ns=0, os=0;
+  const allNames = [...goldSuits,...purpleSuits];
+  allNames.forEach(n => {
+    const info = calcSuit(n);
+    tp+=6; op+=info.ownedCount; mp+=6-info.ownedCount; ns+=info.missingPrice;
+    if(info.ownedCount===6) os++;
+  });
+  document.getElementById('totalSuits').textContent = allNames.length;
+  document.getElementById('totalParts').textContent = tp;
+  document.getElementById('ownedParts').textContent = op;
+  document.getElementById('missingParts').textContent = mp;
+  document.getElementById('ownedSuits').textContent = os;
+  document.getElementById('needStars').textContent = ns;
+
+  let list = allNames.map(n => ({ name:n, ...calcSuit(n), isGold:isGold(n), isPurple:isPurple(n), isFav:favorites.has(n) }));
+  if(searchText) list = list.filter(i => i.name.toLowerCase().includes(searchText));
+  if(filterType==='gold') list = list.filter(i=>i.isGold);
+  else if(filterType==='purple') list = list.filter(i=>i.isPurple);
+  else if(filterType==='fav') list = list.filter(i=>i.isFav);
+
+  if(sortType==='missingAsc') list.sort((a,b)=>a.missingPrice-b.missingPrice);
+  else if(sortType==='missingDesc') list.sort((a,b)=>b.missingPrice-a.missingPrice);
+  else if(sortType==='progressAsc') list.sort((a,b)=>a.progress-b.progress);
+  else if(sortType==='progressDesc') list.sort((a,b)=>b.progress-a.progress);
+
+  const favList = list.filter(i=>i.isFav);
+  const favSec = document.getElementById('favSection');
+  const favCont = document.getElementById('favContainer');
+  if(favList.length>0) {
+    favSec.style.display = 'block';
+    favCont.innerHTML = '';
+    favList.forEach(i => favCont.appendChild(createCard(i)));
+  } else {
+    favSec.style.display = 'none';
+  }
+
+  const allCont = document.getElementById('allContainer');
+  allCont.innerHTML = '';
+  list.forEach(i => allCont.appendChild(createCard(i)));
+
+  renderOverviewChart(op, mp);
+  renderFavChart(list);
+  renderBudget();
+}
+
+function createCard(item) {
+  const card = document.createElement('div');
+  card.className = 'card '+(item.isGold?'gold':'purple');
+  const prices = item.isGold?goldPartPrices:purplePartPrices;
+  const full = item.isGold?195:98;
+  const imgUrl = suitImages[item.name]||'';
+  card.innerHTML = `
+    <div class="card-header">
+      <div>
+        <div class="suit-name">${item.name}</div>
+        <div class="suit-meta">${item.isGold?'金色':'紫色'}套装 · 整套 ${full} 许愿星</div>
+      </div>
+      <button class="fav-btn ${item.isFav?'active':''}" data-name="${item.name}">★</button>
+    </div>
+    <div class="suit-image">${imgUrl?`<img src="${imgUrl}" alt="${item.name}">`:'此处可放套装示意图'}</div>
+    <div class="suit-cost">已拥有 <strong>${item.ownedCount}</strong>/6，集齐还需 <strong>${item.missingPrice}</strong> 许愿星</div>
+    <div class="progress-bar-bg"><div class="progress-bar" style="width:${item.progress}%"></div></div>
+    <div class="parts">
+      ${partNames.map((p,i)=>{
+        const cls = (state[item.name]&&state[item.name][i])?'part owned':'part';
+        return `<span class="${cls}" data-suit="${item.name}" data-index="${i}">${p} ${prices[i]}</span>`;
+      }).join('')}
+    </div>
+  `;
+  card.querySelector('.fav-btn').addEventListener('click', function(){
+    const n = this.dataset.name;
+    if(favorites.has(n)) favorites.delete(n); else favorites.add(n);
+    saveFavorites(favorites);
+    render();
+  });
+  card.querySelectorAll('.part').forEach(el => {
+    el.addEventListener('click', function(){
+      const sn = this.dataset.suit;
+      const idx = parseInt(this.dataset.index,10);
+      if(!state[sn]) state[sn]=Array(6).fill(false);
+      state[sn][idx] = !state[sn][idx];
+      saveState(state);
+      render();
+    });
+  });
+  return card;
+}
+
+function renderOverviewChart(owned, missing) {
+  const ctx = document.getElementById('overviewChart').getContext('2d');
+  if(overviewChart) overviewChart.destroy();
+  overviewChart = new Chart(ctx, {
+    type:'doughnut',
+    data:{ labels:['已拥有配件','未拥有配件'], datasets:[{ data:[owned,missing], backgroundColor:['#2ecc71','#e74c32'], borderWidth:2, borderColor:'#fff' }] },
+    options:{ responsive:true, maintainAspectRatio:false, cutout:'65%', plugins:{ legend:{position:'bottom'}, tooltip:{callbacks:{label:function(c){return c.label+'：'+c.raw+' 个';}}} } }
+  });
+}
+
+function renderFavChart(list) {
+  const canvas = document.getElementById('favChart');
+  const emptyMsg = document.getElementById('favEmptyMsg');
+  const ctx = canvas.getContext('2d');
+
+  if(favChartInst) { favChartInst.destroy(); favChartInst = null; }
+
+  const favItems = list.filter(i=>i.isFav);
+  if(favItems.length===0) {
+    canvas.style.display = 'none';
+    emptyMsg.style.display = 'flex';
+    return;
+  }
+  canvas.style.display = 'block';
+  emptyMsg.style.display = 'none';
+
+  let ownVal=0, totVal=0;
+  favItems.forEach(item => {
+    const prices = item.isGold?goldPartPrices:purplePartPrices;
+    const full = item.isGold?195:98;
+    let ow=0;
+    (state[item.name]||[]).forEach((o,i)=>{ if(o) ow+=prices[i]; });
+    ownVal+=ow; totVal+=full;
+  });
+  const missVal = Math.max(0,totVal-ownVal);
+
+  favChartInst = new Chart(ctx, {
+    type:'doughnut',
+    data:{ labels:['已拥有价值','未拥有价值'], datasets:[{ data:[ownVal,missVal], backgroundColor:['#3498db','#e67e22'], borderWidth:2, borderColor:'#fff' }] },
+    options:{ responsive:true, maintainAspectRatio:false, cutout:'65%', plugins:{ legend:{position:'bottom'}, tooltip:{callbacks:{label:function(c){return c.label+'：'+c.raw+' 许愿星';}}} } }
+  });
+}
+
+// ======================== 数据管理 ========================
+function clearData() {
+  if(!confirm('确定要清除所有已拥有标记和收藏吗？\n\n此操作不会清空预算数据。')) return;
+  state = createDefaultState();
+  favorites = new Set();
+  saveState(state);
+  saveFavorites(favorites);
+  render();
+}
+
+function exportData() {
+  const data = { version:5, exportTime:new Date().toISOString(), state:state, favorites:[...favorites] };
+  const json = JSON.stringify(data,null,2);
+  const blob = new Blob([json],{type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href=url; a.download='洛克王国卡池数据.json'; a.click();
+  URL.revokeObjectURL(url);
+}
+
+function sanitizeImportedState(raw) {
+  const cleaned = createDefaultState();
+  const valid = new Set([...goldSuits,...purpleSuits]);
+  for(const name of valid) {
+    const v = raw[name];
+    if(Array.isArray(v)&&v.length===6) cleaned[name]=v.map(Boolean);
+  }
+  return cleaned;
+}
+
+function importData() {
+  const inp = document.createElement('input');
+  inp.type='file'; inp.accept='.json';
+  inp.onchange = function(){
+    const file = inp.files[0];
+    if(!file) return;
+    const reader = new FileReader();
+    reader.onload = function(e){
+      try {
+        const data = JSON.parse(e.target.result);
+        if(!data||typeof data!=='object') throw new Error('格式错误');
+        if(data.state&&typeof data.state==='object') state = sanitizeImportedState(data.state);
+        favorites = new Set(Array.isArray(data.favorites)?data.favorites:[]);
+        saveState(state);
+        saveFavorites(favorites);
+        render();
+        alert('导入成功！');
+      } catch(err) { alert('导入失败：'+err.message); }
+    };
+    reader.readAsText(file);
+  };
+  inp.click();
+}
+
+// ======================== 启动 ========================
+function initPage() {
+  state = loadState();
+  favorites = loadFavorites();
+  budget = loadBudget();
+  render();
+}
+initPage();
+</script>
+</body>
+</html>
