@@ -183,7 +183,8 @@
 				font-size: 13px;
 			}
 
-			.budget-history summary,.budget-tip summary {
+			.budget-history summary,
+			.budget-tip summary {
 				cursor: pointer;
 				opacity: .9;
 			}
@@ -424,6 +425,15 @@
 				}
 			}
 		</style>
+		<script>
+			var _hmt = _hmt || [];
+			(function() {
+				var hm = document.createElement("script");
+				hm.src = "https://hm.baidu.com/hm.js?2ee701c1a581933c837240eb6988f396";
+				var s = document.getElementsByTagName("script")[0];
+				s.parentNode.insertBefore(hm, s);
+			})();
+		</script>
 	</head>
 	<body>
 		<div class="container">
@@ -482,19 +492,19 @@
 						<summary>查看预算提交历史</summary>
 						<pre id="budgetHistoryText">暂无记录</pre>
 					</details>
-				</div>		
+				</div>
 				<div class="budget-tip">
-				    <details>
-				        <summary>查看使用说明</summary>
-				        <div class="tip-content">
-				            1. 首次使用时，请在"已有许愿星库存"中填写你当前的许愿星数量，然后点击"提交已有库存"。<br>
-				            2. 之后每天打开网页，只需填写"今日许愿星获取量"，例如 15、20、25，再点击"提交今日获取量"。<br>
-				            3. 提交今日获取量后，会自动累加到已有许愿星库存中，并重新计算毕业预算。<br>
-				            4. 毕业所需许愿星 = 当前缺口许愿星 − 已有许愿星库存。<br>
-				            5. 如果今天已经提交过今日获取量，再次提交会要求确认，避免重复累加。<br>
-				            6. 如果已有许愿星库存录入错误或忘记录入，可以直接修改"已有许愿星库存"，然后点击"提交已有库存"进行修正。
-				        </div>
-				    </details>
+					<details>
+						<summary>查看使用说明</summary>
+						<div class="tip-content">
+							1. 首次使用时，请在"已有许愿星库存"中填写你当前的许愿星数量，然后点击"提交已有库存"。<br>
+							2. 之后每天打开网页，只需填写"今日许愿星获取量"，例如 15、20、25，再点击"提交今日获取量"。<br>
+							3. 提交今日获取量后，会自动累加到已有许愿星库存中，并重新计算毕业预算。<br>
+							4. 毕业所需许愿星 = 当前缺口许愿星 − 已有许愿星库存。<br>
+							5. 如果今天已经提交过今日获取量，再次提交会要求确认，避免重复累加。<br>
+							6. 如果已有许愿星库存录入错误或忘记录入，可以直接修改"已有许愿星库存"，然后点击"提交已有库存"进行修正。
+						</div>
+					</details>
 				</div>
 			</div>
 
@@ -577,7 +587,7 @@
 				"音速犬印象", "岚鸟印象", "厉毒修萝印象", "星光狮印象", "烈火守护印象",
 				"皇家狮鹫印象", "翠顶夫人印象", "卡洛儿印象", "花魁蜂后印象", "爵士鹿印象",
 				"熔岩布丁印象", "蹦蹦花印象", "红绒十字印象", "白金独角兽印象", "花衣蝶印象",
-				"嘟嘟锅印象","九幽菇印象","琉璃水母印象"
+				"嘟嘟锅印象", "九幽菇印象", "琉璃水母印象"
 			];
 			const purpleSuits = [
 				"獠牙猪印象", "圣代甜甜印象", "蒲公英娃娃印象", "梦悠悠印象",
@@ -605,7 +615,7 @@
 				"嘟嘟锅印象": "https://bee-reg-ab.imagency.cn/e/f4ea319fb1bb79a7172c8ca67287bc5a.jpg",
 				"九幽菇印象": "https://bee-reg-ab.imagency.cn/e/9e2f205af3eedb808ac9333608242e74.jpg",
 				"琉璃水母印象": "https://bee-reg-ab.imagency.cn/e/595ab4099ec2cddaa5f7e222bbe40a39.jpg",
-			
+
 				"獠牙猪印象": "https://bee-reg-ab.imagency.cn/e/44b64dec33da549e46bc0fb1de33383d.jpg",
 				"圣代甜甜印象": "https://bee-reg-ab.imagency.cn/e/bd9ed2d19c469caafd375061f6462886.jpg",
 				"蒲公英娃娃印象": "https://bee-reg-ab.imagency.cn/e/9de68f2d6d2511959c663e63eb494c43.jpg",
