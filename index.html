@@ -76,6 +76,20 @@
 				background: var(--success);
 			}
 
+			.site-disclaimer {
+				font-size: 12px;
+				color: #7f8c8d;
+				text-align: center;
+				max-width: 760px;
+				margin: 0 auto 18px;
+				padding: 10px 16px;
+				background: rgba(255, 255, 255, 0.7);
+				backdrop-filter: blur(4px);
+				border: 1px solid #eaecef;
+				border-radius: 8px;
+				line-height: 1.5;
+			}
+
 			.budget-panel {
 				background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
 				color: #fff;
@@ -385,6 +399,58 @@
 				border-color: #ccc;
 			}
 
+			.part.unaffordable {
+				border-color: #e67e22;
+				color: #c0392b;
+				background: #fff8f5;
+			}
+
+			.part.unaffordable:hover {
+				background: #ffeee8;
+				border-color: #d35400;
+			}
+
+			.btn-backfill-off {
+				background: #95a5a6;
+			}
+
+			.btn-backfill-on {
+				background: #27ae60;
+			}
+
+			.backfill-banner {
+				background: #eafaf1;
+				border: 1.5px solid #27ae60;
+				border-radius: 8px;
+				padding: 10px 16px;
+				margin-bottom: 18px;
+				font-size: 13px;
+				color: #1e8449;
+				display: none;
+				line-height: 1.6;
+			}
+
+			.backfill-banner.visible {
+				display: block;
+			}
+
+			#starCounter {
+				position: fixed;
+				bottom: 24px;
+				right: 24px;
+				background: linear-gradient(135deg, #667eea, #764ba2);
+				color: #fff;
+				padding: 10px 16px;
+				border-radius: 24px;
+				font-size: 13px;
+				font-weight: bold;
+				box-shadow: 0 3px 14px rgba(0, 0, 0, .28);
+				z-index: 999;
+				pointer-events: none;
+				line-height: 1.4;
+				text-align: center;
+			}
+
 			.filter-bar {
 				display: flex;
 				flex-wrap: wrap;
@@ -439,20 +505,27 @@
 		<div class="container">
 
 			<h1>洛克王国 · 皮卡随机商店卡池</h1>
-			<p class="subtitle">数据会自动保存在本地（不能使用浏览器无痕模式）；如要更换浏览器，需要导出数据并导入新浏览器；</p>
-			<p style="font-size:12px;color:#888;text-align:center;max-width:760px;margin:0 auto 18px;">
+			<p class="subtitle">标记配件时自动扣除许愿星库存，取消标记时自动返还；请先在下方「预算规划」中填写库存再开始标记 · 数据自动保存在本地（不支持无痕模式）</p>
+			<p class="site-disclaimer">
 				非官方粉丝工具 · 与腾讯/魔方工作室无关 · 素材来源于游戏内截图 · 仅供玩家交流参考
 			</p>
 			<div class="top-bar">
 				<button class="btn-clear" onclick="clearData()">清除数据</button>
 				<button class="btn-export" onclick="exportData()">导出数据</button>
 				<button class="btn-import" onclick="importData()">导入数据</button>
+				<button id="backfillBtn" class="btn-backfill-on" onclick="toggleBackfill()">📝 补录模式：开</button>
+			</div>
+
+			<div id="backfillBanner" class="backfill-banner visible">
+				📝 <strong>当前处于补录模式</strong> — 标记/取消配件不扣除也不返还许愿星，适合首次录入已购配件。<br>
+				录入完成后，请在下方「预算规划」填写您<strong>当前实际的许愿星库存</strong>并提交，然后点击「补录模式：开」关闭补录模式，之后的标记将自动扣减库存。
 			</div>
 
 			<div class="budget-panel">
 				<div class="budget-title">⭐ 许愿星预算规划</div>
 				<div class="budget-desc" id="budgetGuide">
-					首次使用时，请在"已有许愿星库存"中填写当前库存，然后点击"提交已有库存"。之后每天打开网页，只需填写"今日许愿星获取量"并提交即可。</div>
+					首次使用时，请在「已有许愿星库存」中填写当前库存并提交。之后标记配件为已拥有时，许愿星会自动从库存中扣除；取消标记时自动返还；库存不足则禁止标记。每天新增许愿星后填写「今日获取量」并提交即可。
+				</div>
 				<div class="budget-form">
 					<div class="budget-field"><label>已有许愿星库存</label><input type="number" id="budgetStarStock" value="0"
 							min="0"></div>
@@ -497,12 +570,13 @@
 					<details>
 						<summary>查看使用说明</summary>
 						<div class="tip-content">
-							1. 首次使用时，请在"已有许愿星库存"中填写你当前的许愿星数量，然后点击"提交已有库存"。<br>
-							2. 之后每天打开网页，只需填写"今日许愿星获取量"，例如 15、20、25，再点击"提交今日获取量"。<br>
-							3. 提交今日获取量后，会自动累加到已有许愿星库存中，并重新计算毕业预算。<br>
+							1. 首次使用时，请在"已有许愿星库存"中填写你当前的许愿星数量，然后点击"提交已有库存"，之后才能标记配件。<br>
+							2. 标记配件为已拥有时，系统会自动从库存中扣除对应许愿星；取消标记时自动返还；库存不足则禁止标记。<br>
+							3. 每天新增许愿星时，填写"今日许愿星获取量"（如 15、20、25），点击"提交今日获取量"，会自动累加到库存。<br>
 							4. 毕业所需许愿星 = 当前缺口许愿星 − 已有许愿星库存。<br>
 							5. 如果今天已经提交过今日获取量，再次提交会要求确认，避免重复累加。<br>
-							6. 如果已有许愿星库存录入错误或忘记录入，可以直接修改"已有许愿星库存"，然后点击"提交已有库存"进行修正。
+							6. 如果许愿星库存录入错误，可以直接修改"已有许愿星库存"，然后点击"提交已有库存"进行修正。<br>
+							7. 清除全部数据时，已购配件消耗的许愿星会自动返还至库存。
 						</div>
 					</details>
 				</div>
@@ -580,6 +654,8 @@
 			</div>
 
 		</div>
+
+		<div id="starCounter">⭐ 许愿星库存<br><span id="starCounterVal">0</span></div>
 
 		<script>
 			// ======================== 卡池数据 ========================
@@ -737,6 +813,36 @@
 
 			let budget = loadBudget();
 
+			// ======================== 补录模式 ========================
+			// 新用户预算未初始化时，默认开启补录模式（仅会话有效，不持久化）
+			function isBudgetInitialized() {
+				return budget.starStock > 0 || budget.history.some(
+					h => h.操作 === '修正已有库存' || h.操作 === '提交今日获取量'
+				);
+			}
+
+			let backfillMode = !isBudgetInitialized();
+
+			function toggleBackfill() {
+				backfillMode = !backfillMode;
+				updateBackfillUI();
+				render();
+			}
+
+			function updateBackfillUI() {
+				const btn = document.getElementById('backfillBtn');
+				const banner = document.getElementById('backfillBanner');
+				if (backfillMode) {
+					btn.textContent = '📝 补录模式：开';
+					btn.className = 'btn-backfill-on';
+					banner.classList.add('visible');
+				} else {
+					btn.textContent = '📝 补录模式：关';
+					btn.className = 'btn-backfill-off';
+					banner.classList.remove('visible');
+				}
+			}
+
 			function getTodayStr() {
 				const d = new Date();
 				return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2,
@@ -761,7 +867,9 @@
 				saveBudget(budget);
 				renderBudget();
 				render();
-				alert('已有许愿星库存已更新！\n\n原库存：' + os + '\n新库存：' + ns);
+				let msg = '已有许愿星库存已更新！\n\n原库存：' + os + '\n新库存：' + ns;
+				if (backfillMode) msg += '\n\n💡 提示：库存已填写，建议现在关闭「补录模式」，之后的标记将自动扣减许愿星。';
+				alert(msg);
 			}
 
 			function submitTodayGain() {
@@ -806,10 +914,16 @@
 			}
 
 			function renderBudget() {
-				document.getElementById('budgetStarStock').value = budget.starStock;
-				document.getElementById('budgetTodayGain').value = budget.todayGain;
+				// 仅在输入框未被用户聚焦时同步，避免打断正在输入
+				const stockInp = document.getElementById('budgetStarStock');
+				const gainInp = document.getElementById('budgetTodayGain');
+				if (document.activeElement !== stockInp) stockInp.value = budget.starStock;
+				if (document.activeElement !== gainInp) gainInp.value = budget.todayGain;
 				document.getElementById('budgetStockDisplay').textContent = budget.starStock;
 				document.getElementById('budgetTodayDisplay').textContent = budget.todayGain;
+				// 更新悬浮许愿星计数器
+				const cv = document.getElementById('starCounterVal');
+				if (cv) cv.textContent = budget.starStock;
 
 				let gap = 0;
 				[...goldSuits, ...purpleSuits].forEach(n => {
@@ -829,9 +943,13 @@
 
 				const he = document.getElementById('budgetHistoryText');
 				if (budget.history.length === 0) he.textContent = '暂无记录';
-				else he.textContent = budget.history.map(h => {
-					if (h.操作 === '修正已有库存') return h.日期 + '：' + h.操作 + '，' + h.原库存 + ' → ' + h.新库存;
-					return h.日期 + '：' + h.操作 + '，' + h.今日获取量 + '，库存 ' + h.提交后库存;
+				else he.textContent = [...budget.history].reverse().map(h => {
+					if (h.操作 === '修正已有库存') return h.日期 + ' ｜ 修正库存 ' + h.原库存 + ' → ' + h.新库存;
+					if (h.操作 === '提交今日获取量') return h.日期 + ' ｜ +' + h.今日获取量 + '⭐（今日获取）→ 库存 ' + h.提交后库存;
+					if (h.操作 === '购买配件') return h.日期 + ' ｜ -' + h.花费 + '⭐ 购入【' + h.套装 + '】' + h.配件 + ' → 库存 ' + h.操作后库存;
+					if (h.操作 === '退回配件') return h.日期 + ' ｜ +' + h.返还 + '⭐ 退回【' + h.套装 + '】' + h.配件 + ' → 库存 ' + h.操作后库存;
+					if (h.操作 === '清除全部数据并返还') return h.日期 + ' ｜ +' + h.返还 + '⭐（清除全部返还）→ 库存 ' + h.操作后库存;
+					return JSON.stringify(h);
 				}).join('\n');
 
 				const guide = document.getElementById('budgetGuide');
@@ -924,7 +1042,10 @@
     <div class="progress-bar-bg"><div class="progress-bar" style="width:${item.progress}%"></div></div>
     <div class="parts">
       ${partNames.map((p,i)=>{
-        const cls = (state[item.name]&&state[item.name][i])?'part owned':'part';
+        const isOwned = state[item.name]&&state[item.name][i];
+        let cls = 'part';
+        if (isOwned) cls += ' owned';
+        else if (!backfillMode && prices[i] > budget.starStock) cls += ' unaffordable';
         return `<span class="${cls}" data-suit="${item.name}" data-index="${i}">${p} ${prices[i]}</span>`;
       }).join('')}
     </div>
@@ -941,7 +1062,52 @@
 						const sn = this.dataset.suit;
 						const idx = parseInt(this.dataset.index, 10);
 						if (!state[sn]) state[sn] = Array(6).fill(false);
-						state[sn][idx] = !state[sn][idx];
+						const prices = isGold(sn) ? goldPartPrices : purplePartPrices;
+						const cost = prices[idx];
+						const wasOwned = state[sn][idx]; // false | 'backfill' | 'purchase'
+
+						if (!wasOwned) {
+							// ── 标记为已拥有 ──
+							if (backfillMode) {
+								// 补录模式：仅记录，不扣星
+								state[sn][idx] = 'backfill';
+							} else {
+								// 正常模式：检查并扣星
+								if (budget.starStock < cost) {
+									alert('许愿星不足！\n\n「' + partNames[idx] + '」需要 ' + cost + ' ⭐\n当前库存：' + budget
+										.starStock + ' ⭐\n\n请先补充许愿星库存，或开启「补录模式」直接记录。');
+									return;
+								}
+								budget.starStock -= cost;
+								budget.history.push({
+									日期: getTodayStr(),
+									操作: '购买配件',
+									套装: sn,
+									配件: partNames[idx],
+									花费: cost,
+									操作后库存: budget.starStock
+								});
+								saveBudget(budget);
+								state[sn][idx] = 'purchase';
+							}
+						} else {
+							// ── 取消已拥有 ──
+							if (wasOwned === 'purchase') {
+								// 只返还当初实际扣过星的配件
+								budget.starStock += cost;
+								budget.history.push({
+									日期: getTodayStr(),
+									操作: '退回配件',
+									套装: sn,
+									配件: partNames[idx],
+									返还: cost,
+									操作后库存: budget.starStock
+								});
+								saveBudget(budget);
+							}
+							// 'backfill' 项：从未扣星，直接取消即可
+							state[sn][idx] = false;
+						}
 						saveState(state);
 						render();
 					});
@@ -1049,7 +1215,25 @@
 
 			// ======================== 数据管理 ========================
 			function clearData() {
-				if (!confirm('确定要清除所有已拥有标记和收藏吗？\n\n此操作不会清空预算数据。')) return;
+				if (!confirm('确定要清除所有已拥有标记和收藏吗？\n\n通过「正常模式」购买的配件许愿星将返还至库存；通过「补录模式」记录的配件不影响库存。\n预算历史保留。')) return;
+				// 只返还「正常模式」实际购买的配件星数（'purchase'），补录项（'backfill'）从未扣星不计
+				let refund = 0;
+				[...goldSuits, ...purpleSuits].forEach(name => {
+					const prices = isGold(name) ? goldPartPrices : purplePartPrices;
+					(state[name] || []).forEach((o, i) => {
+						if (o === 'purchase') refund += prices[i];
+					});
+				});
+				if (refund > 0) {
+					budget.starStock += refund;
+					budget.history.push({
+						日期: getTodayStr(),
+						操作: '清除全部数据并返还',
+						返还: refund,
+						操作后库存: budget.starStock
+					});
+					saveBudget(budget);
+				}
 				state = createDefaultState();
 				favorites = new Set();
 				saveState(state);
@@ -1082,7 +1266,13 @@
 				const valid = new Set([...goldSuits, ...purpleSuits]);
 				for (const name of valid) {
 					const v = raw[name];
-					if (Array.isArray(v) && v.length === 6) cleaned[name] = v.map(Boolean);
+					if (Array.isArray(v) && v.length === 6) {
+						cleaned[name] = v.map(x => {
+							if (x === 'purchase') return 'purchase';
+							if (x === 'backfill') return 'backfill';
+							return Boolean(x) ? 'backfill' : false; // 旧版 true 视为补录（未扣星）
+						});
+					}
 				}
 				return cleaned;
 			}
@@ -1131,6 +1321,9 @@
 				state = loadState();
 				favorites = loadFavorites();
 				budget = loadBudget();
+				// 根据预算初始化状态同步补录模式按钮
+				backfillMode = !isBudgetInitialized();
+				updateBackfillUI();
 				render();
 			}
 			initPage();
