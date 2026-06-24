@@ -64,6 +64,50 @@
 				color: #fff;
 			}
 
+			.gender-panel {
+				background: var(--card);
+				border: 1px solid #e8eaee;
+				border-radius: 10px;
+				padding: 14px 18px;
+				margin-bottom: 18px;
+				box-shadow: 0 2px 8px rgba(0, 0, 0, .05);
+			}
+
+			.gender-title {
+				font-size: 15px;
+				font-weight: bold;
+				margin-bottom: 10px;
+			}
+
+			.gender-options {
+				display: flex;
+				flex-wrap: wrap;
+				gap: 10px;
+			}
+
+			.gender-option {
+				display: inline-flex;
+				align-items: center;
+				gap: 6px;
+				border: 1px solid #d9dde4;
+				border-radius: 8px;
+				padding: 8px 14px;
+				cursor: pointer;
+				background: #fff;
+				font-size: 14px;
+			}
+
+			.gender-option input {
+				margin: 0;
+			}
+
+			.gender-help {
+				margin-top: 10px;
+				font-size: 13px;
+				color: var(--sub);
+				line-height: 1.6;
+			}
+
 			.btn-clear {
 				background: var(--danger);
 			}
@@ -516,6 +560,21 @@
 				<button id="backfillBtn" class="btn-backfill-on" onclick="toggleBackfill()">📝 补录模式：开</button>
 			</div>
 
+			<div class="gender-panel">
+				<div class="gender-title">性别</div>
+				<div class="gender-options">
+					<label class="gender-option">
+						<input type="radio" name="gender" value="female" onchange="setGender(this.value)">
+						<span>女</span>
+					</label>
+					<label class="gender-option">
+						<input type="radio" name="gender" value="male" onchange="setGender(this.value)">
+						<span>男</span>
+					</label>
+				</div>
+				<div class="gender-help">导入旧数据时会继续匹配原来的套装进度、收藏和许愿星；旧数据没有性别字段时，会使用当前选择的性别。</div>
+			</div>
+
 			<div id="backfillBanner" class="backfill-banner visible">
 				📝 <strong>当前处于补录模式</strong> — 标记/取消配件不扣除也不返还许愿星，适合首次录入已购配件。<br>
 				录入完成后，请在下方「预算规划」填写您<strong>当前实际的许愿星库存</strong>并提交，然后点击「补录模式：开」关闭补录模式，之后的标记将自动扣减库存。
@@ -703,8 +762,66 @@
 			};
 
 			// ======================== 状态管理 ========================
+			const boySuitImages = {
+				"音速犬印象": "https://p.sda1.dev/33/f6f4851b326e2c9e67ea68dd811b712f/yinsuquan.png",
+				"岚鸟印象": "https://p.sda1.dev/33/c51fc62a5cbb2751b62958b81dba874f/lanniao.png",
+				"厉毒修萝印象": "https://p.sda1.dev/33/5318efdf3540632f99b5159271c9f252/liduxiuluo.png",
+				"星光狮印象": "https://p.sda1.dev/33/ae818efc69fa375b0e7304785c2b3e2e/xingguangshi.png",
+				"烈火守护印象": "https://p.sda1.dev/33/1323c5fb356cd7419b083a32e6a8f75b/liehuoshouhu.png",
+				"皇家狮鹫印象": "https://p.sda1.dev/33/1cbe71e4bbf01d889bc207c830411869/shijiu.png",
+				"翠顶夫人印象": "https://p.sda1.dev/33/9c2a48122723db3329112174b98bee15/cuidingfuren.png",
+				"卡洛儿印象": "https://p.sda1.dev/33/0f21f81a84474bfaaef1f3726be799a2/kaluoeer.png",
+				"花魁蜂后印象": "https://p.sda1.dev/33/be87516b359614014b3e6b1b5f561af6/fenghou.png",
+				"爵士鹿印象": "https://p.sda1.dev/33/2c6d2bf3520d08ffc6be2fa281d9c17b/jueshilu.png",
+				"熔岩布丁印象": "https://p.sda1.dev/33/e26ae41f9dc7346398b43ec6ff39719f/buding.png",
+				"蹦蹦花印象": "https://p.sda1.dev/33/57c3703d4d9f47ad047bcc67506033da/bengbenghua.png",
+				"红绒十字印象": "https://p.sda1.dev/33/57996358d9cbe1c44abd94620032967e/hongrong.png",
+				"白金独角兽印象": "https://p.sda1.dev/33/8904570d7b7026357dec9a312dc13f5b/dujiaoshou.png",
+				"花衣蝶印象": "https://p.sda1.dev/33/c0ad887196aa17847ee02f30da35fa29/huayidie.png",
+				"嘟嘟锅印象": "https://p.sda1.dev/33/7daf045aaa0fcc0c7443c49206c4455f/duduguo.png",
+				"九幽菇印象": "https://p.sda1.dev/33/7c04d97e03a86a8b5bd05faf0d5f5e59/jiuyougu.png",
+				"琉璃水母印象": "https://p.sda1.dev/33/fb401026518ad74ae7077638f45f8cfa/liulishuimu.png",
+
+				"獠牙猪印象": "https://p.sda1.dev/33/55c04eb7a9ad6c84cea1ce03388b03f9/liaoyazhu.png",
+				"圣代甜甜印象": "https://p.sda1.dev/33/40bd0201f4975f83ce3c005890f8878a/shengdaitiantian.png",
+				"蒲公英娃娃印象": "https://p.sda1.dev/33/886ee62931e4ab91a3e398ddc2280592/pugongying.png",
+				"梦悠悠印象": "https://p.sda1.dev/33/55b8b4030b6cf55cacd5692006a917d6/mengyouyou.png",
+				"电球咩咩印象": "https://p.sda1.dev/33/3d6052b974fcb4b6adaeb9f55b2c071d/dianqiumiemie.png",
+				"雪影娃娃印象": "https://p.sda1.dev/33/20b8e7978486d80575f522317366da53/xueying.png",
+				"幽冥眼印象": "https://p.sda1.dev/33/ab146de5f80d5fcf1d5261980f72b65e/youmingyan.png",
+				"雪灵印象": "https://p.sda1.dev/33/dfccf1fd94f45bfeb6e050549beab4bc/xueling.png"
+			};
+
 			const STORAGE_KEY = "laoke_pica_card_pool_v4";
 			const FAV_KEY = "laoke_pica_favorites_v4";
+			const GENDER_KEY = "laoke_pica_gender_v1";
+
+			function loadGender() {
+				const g = localStorage.getItem(GENDER_KEY);
+				return g === 'male' ? 'male' : 'female';
+			}
+
+			function saveGender(g) {
+				localStorage.setItem(GENDER_KEY, g === 'male' ? 'male' : 'female');
+			}
+
+			function getSuitImage(name) {
+				const genderImages = currentGender === 'male' ? boySuitImages : suitImages;
+				return genderImages[name] || suitImages[name] || '';
+			}
+
+			function syncGenderUI() {
+				document.querySelectorAll('input[name="gender"]').forEach(input => {
+					input.checked = input.value === currentGender;
+				});
+			}
+
+			function setGender(g) {
+				currentGender = g === 'male' ? 'male' : 'female';
+				saveGender(currentGender);
+				syncGenderUI();
+				render();
+			}
 
 			function createDefaultState() {
 				const s = {};
@@ -744,6 +861,7 @@
 
 			let state = loadState();
 			let favorites = loadFavorites();
+			let currentGender = loadGender();
 
 			function isGold(n) {
 				return goldSuits.includes(n);
@@ -1028,7 +1146,7 @@
 				card.className = 'card ' + (item.isGold ? 'gold' : 'purple');
 				const prices = item.isGold ? goldPartPrices : purplePartPrices;
 				const full = item.isGold ? 195 : 98;
-				const imgUrl = suitImages[item.name] || '';
+				const imgUrl = getSuitImage(item.name);
 				card.innerHTML = `
     <div class="card-header">
       <div>
@@ -1243,8 +1361,9 @@
 
 			function exportData() {
 				const data = {
-					version: 1,
+					version: 2,
 					exportTime: new Date().toISOString(),
+					gender: currentGender,
 					state: state,
 					favorites: [...favorites],
 					budget: budget
@@ -1288,6 +1407,9 @@
 					reader.onload = function(e) {
 						try {
 							const data = JSON.parse(e.target.result);
+							if (data.gender === 'male' || data.gender === 'female') {
+								currentGender = data.gender;
+							}
 							if (data.state && typeof data.state === "object") {
 								state = sanitizeImportedState(data.state);
 							}
@@ -1305,6 +1427,8 @@
 							} else {}
 							saveState(state);
 							saveFavorites(favorites);
+							saveGender(currentGender);
+							syncGenderUI();
 							render();
 							alert('导入成功！');
 						} catch (err) {
@@ -1320,9 +1444,11 @@
 			function initPage() {
 				state = loadState();
 				favorites = loadFavorites();
+				currentGender = loadGender();
 				budget = loadBudget();
 				// 根据预算初始化状态同步补录模式按钮
 				backfillMode = !isBudgetInitialized();
+				syncGenderUI();
 				updateBackfillUI();
 				render();
 			}
