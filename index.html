@@ -843,7 +843,10 @@
 					const r = localStorage.getItem(STORAGE_KEY);
 					if (r) {
 						const p = JSON.parse(r);
-						if (typeof p === 'object') return p;
+						if (typeof p === 'object' && p !== null) return {
+							...createDefaultState(),
+							...p
+						};
 					}
 				} catch (e) {
 					console.error(e)
